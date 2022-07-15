@@ -1,0 +1,127 @@
+---
+title: "QANT 530 Homework #1"
+author: "Phan Nguyen"
+date: "07/12/2022"
+output: pdf_document
+---
+For this homework, we are going to do a simple regression analysis on UtilityCosts and MaintenanceCosts from the practice dataset.
+UtilityCosts will be explanatory variable, and MaintenanceCosts will be the response variable.
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height=6, fig.align="center")
+par(mar=c(0,0,0,0))
+```
+
+
+```{r  message=FALSE}
+library(moments)
+library(tidyverse)
+library(xlsx)
+library(psych)
+data <- read.xlsx("/Users/nguyen_phan/Downloads/Practice Dataset.xlsx", 1)
+head(data)
+response <- data[,2]
+independent <- data[,1]
+```
+Table 1: Dataset example
+
+### 1.Exploratory Analysis on the response variable
+
+**Descriptive numerical summary table**
+```{r }
+describe(response, ranges=TRUE, quant=c(.25,.75))
+```
+\begin {center} Table 2: Descriptive Statistics table for MaintenanceCosts \end {center}
+
+MaintenanceCosts has a minimum of -1.711, a negative number. This is quite strange, but since we don't know the context of this dataset, we won't know if this number makes sense. 
+Mean and median for MaintenanceCosts are approximately equal, thus meaning the distribution for this variable is symmetrical.   
+The interquartile range for this variable is between 7.58 and 14.25, meaning 50% of values for this variable are in this range.   
+The standard deviation for MaintenanceCosts is 5.39. Using Empirical Rule, we can expect that 95% of values are between -0.35 and 21.21 (2 stanadard deviation).  
+  
+  
+Skewness MaintenanceCosts are very close to 0, suggesting that the distribution for the variable is not quite skewed to either left or right.
+The measures of center also suggested the same. 
+The excess kurtosis is around -0.6. Excess kurtosis is equal to normal kurtosis - 3.
+In this case, the kurtosis shows that the distribution is very close to a normal distribution.
+MaintenanceCosts's distribution has heavier tails and lower bell, due to its kurtosis to be lower than 0.  
+    
+**Descriptive chart summaries**  
+```{r }
+par(mar=c(4,4,0,0))
+hist(response, main = "",xlab="Maintenance Costs", breaks=10)
+```
+\begin {center} Figure 1: Histogram of MaintenanceCosts  \end{center}
+
+The histogram shows the frequency of data values of MaintenanceCosts variable. We can cross check it with the numerical summary we've done on the top. 
+The mean is approximately 10. The distribution is close to a normal distribution, however, the bins on the left side of the mean have less frequency that those on the right of the mean.  
+The variable is not skewed hardly to one side or another.   
+
+```{r }
+par(mar=c(0,4,0,0))
+boxplot(response)
+```
+\begin{center} Figure 2: Boxplot of MaintenanceCosts  \end{center}  
+  
+  
+Visually, the boxplot of this variable looks normal. There are whiskers indicating the maximum and minimum values, corresponding to what we saw in the numerical descriptive statistcs.
+The gray box represents the interquartile range, where the lower bound is the first quartile and the upper bound is the third quartile.
+The black line in the middle indicates the median. We can see that the median is in the middle of this gray box, meaning it has approximately the same range to the first and third quartiles. 
+From this boxplot, we can see that the variable's distribution is skewed to the left by a small amount. 
+
+
+### 2. Scatterplot analysis
+```{r }
+par(mar=c(4,4,0,0))
+plot(independent,response,xlab="Utility Cost", ylab= "Maintenance Cost")
+ 
+```
+\begin{center}Figure 3: Scatterplot for UtilityCosts and MaintenanceCosts \end{center}  
+
+There seems to be low correlation between the two variables, when we first look at the scatterplot.
+The data points seems to be everywhere. However, if we analyze closely, there are some types of downward trend for the points.
+We can expect that the Pearson correlation is small, and negative.  
+  
+And the correlation between UtilityCosts and MaintenanceCosts is
+```{r}
+cor(response, independent)
+```
+, which is in line with our visual analysis above. 
+
+### 3. Residual plot analysis
+```{r}
+model <- lm(MaintenceCosts~UtilityCosts, data=data)
+res <- resid(model)
+plot(fitted(model),res, xlab="Fitted", ylab="Residuals")
+```
+\begin{center}Figure 4: Residual Plot for UtilityCosts and MaintenanceCosts \end{center}  
+The residual plot seems to be spread out, meaning that the variances between predicted and observed are distributed.
+There is no distinct pattern, thus we can say that the equal variance assumptions is met. 
+
+### 4. Simple regression assumption check 
+```{r}
+par(mfrow = c(2, 2))
+plot(model)
+```
+\begin{center}Figure 4: Simple Regression Plots for models \end{center}  
+
+We can check the assumptions for the simple regression model using these plots. 
+The residual plot on the left hand side, shows how the predicted versus observed values, similarly to Figure 4.
+Ideally, the red line will stay horizontally at 0. In this case, the red line is not fully horizontal, however it is still close to the zero line. 
+The points are scattered and don't follow any pattern. We can conclude that the linearity and equal variances assumptions are met. 
+  
+Homonegeity can be checked using the Scale-Location plot, on the bottom left hand. The red line supposed to be horizontally at zero for homogeneity assumption to be met. 
+It is not the case here. 
+
+The normal Q-Q plots on the top right shows visually a straight line, meaning that the normality assumption is met. 
+
+```{r}
+summary(model)
+```
+
+
+
+
+
+
+
+
