@@ -1,0 +1,150 @@
+---
+title: "QANT 530 Homework #2"
+author: "Phan Nguyen"
+date: "07/12/2022"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 11pt 
+---
+
+For this homework, we are going to do a multiple regression analysis on a practice dataset with 150 rows and five columns. 
+The response variable is AverageMonthlyOrders. Below is a sample of the dataset. 
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height=6, fig.align="center")
+par(mar=c(0,0,0,0))
+```
+Region is categorical and assumably nominal. 
+Number of employees, inventory value and average monthly orders are continuous. 
+
+```{r  message=FALSE}
+library(moments)
+library(tidyverse)
+library(xlsx)
+library(psych)
+data <- read.xlsx("/Users/nguyen_phan/Documents/GitHub/uona-lab/QANT530/datasets/Practice Dataset .xlsx", 1)
+data <- data[,0:4]
+head(data)
+response <- data$AverageMonthlyOrders
+
+```
+Table 1: Dataset example
+
+### 1.Exploratory Analysis on the response variable
+
+**Descriptive numerical summary table**
+```{r }
+describe(response, ranges=TRUE, quant=c(.25,.75))
+```
+\begin {center} Table 2: Descriptive Statistics table for AverageMonthlyOrders \end {center}
+
+AverageMonthlyOrders has a logical range of values, from 214.03 to 455.06. 
+Its median and mean are close, meaning its distrubtion is not skewed toward left or right.
+The interquartile range is between 288.8 and 365.07, meaning 50% of the values are in between this range. 
+Standard deviation is 49.6, meaning 95% of values are two standard deviations from the mean, between 226.25 and 424.65, according to empirical rules.
+  
+Skewness for AverageMonthlyOrders are quite close to 0, suggesting that the distribution for the variable is not quite skewed.
+The measures of center also suggested the same. 
+The excess kurtosis is around -0.4. Excess kurtosis is equal to normal kurtosis - 3.
+In this case, the kurtosis shows that the distribution is close to a normal distribution.
+AverageMonthlyOrders's distribution has heavier tails and lower bell, due to its kurtosis to be lower than 0.  
+\  
+\  
+\  
+\  
+\  
+  
+
+**Descriptive chart summaries**    
+```{r }
+par(mar=c(4,4,0,0))
+hist(response, main = "",xlab="Average Monthly Orders", breaks=10)
+```
+\begin {center} Figure 1: Histogram of AverageMonthlyOrders  \end{center}
+
+This histogram shows the distribution for AverageMonthlyOrders. It does look like the distribution is bimodal, meaning there are two modes, thus two peaks in this histograms. 
+The median and mean bin [300,350] (doesn't have a high frequency, which means this distribution is not normal.
+The right tail has lower frequency than the left tail.  
+
+```{r }
+par(mar=c(0,4,0,0))
+boxplot(response)
+```
+\begin{center} Figure 2: Boxplot of AverageMonthlyOrders  \end{center}  
+  
+  
+Visually, the boxplot of this variable looks normal. There are whiskers indicating the maximum and minimum values, corresponding to what we saw in the numerical descriptive statistcs.
+The gray box represents the interquartile range, where the lower bound is the first quartile and the upper bound is the third quartile.
+The black line in the middle indicates the median. We can see that the median is in the middle of this gray box, meaning it has approximately the same range to the first and third quartiles. 
+We can't tell that this variable has a mode different than the median, which is interesting. 
+
+### 2. Scatterplot analysis
+```{r }
+pairs(data[,1:4], lower.panel=NULL)
+ 
+```
+\begin{center}Figure 3: Scatterplot Matrix \end{center}  
+
+Next, we create a scatterplot matrix between our response variable AverageMonthlyOrders and the explanatory variables. 
+The scatterplot between AverageMonthlyOrders and Number of Employees shows a clear linear upward trend. It looks like more employees bring more average monthly orders. 
+There are also an upward trend between regions and average monthly orders, which is very interesting. Regions are nominal, so if we give the regions a different numbers, they are not going to change their meaning in the dataset.
+So it was interesting that coincidentally, they are sorted in a way that created a linear trend. However, since they are categorical, this doesn't tell us a lot about their correlation. 
+There is no distinctive pattern between InventoryValue and AverageMonthlyOrders. 
+  
+```{r}
+cor(data,method="pearson")
+```
+
+\begin{center}Table 3: Correlation Matrix \end{center}  
+
+We can see that there are strong correlation - near 1 - between number of employees and average monthly orders. 
+The correlation between regions and average monthly orders is high as well, however, since Region is nominal, it doesn't mean much, 
+Week correlation between AverageMonthlyOrders and InventoryValue.  
+It looks like the explanatory variables are not correlated, so there is no multicollinearity problem.
+
+
+### 3. Multiple regression assumption check 
+First, we fit the data into a model to check all assumptions. Response variable is AverageMonthlyOrders.
+
+```{r}
+model <- lm(AverageMonthlyOrders~NumberOfEmployees + InventoryValue + factor(Region), data=data)
+res <- resid(model)
+par(mfrow = c(2, 2))
+plot(model)
+```
+\begin{center}Figure 4: Simple Regression Plots for models \end{center}  
+
+We can check the assumptions for the multiple regression model using these plots. 
+The residual plot on the left hand side, shows how the predicted versus observed values.
+Ideally, the red line will stay horizontally at 0. In this case, the red line is approximately horizontal and at line 0. 
+The points are scattered and don't follow any pattern. We can conclude that the **linearity and equal variances assumptions are met**. 
+  
+Independence of variance can be checked using the Scale-Location plot, on the bottom left hand. The red line supposed to be horizontally at zero for the assumption to be met. 
+We can say that **the indpendence of variance assumption is met**.  
+  
+The normal Q-Q plots on the top right shows visually a straight line, meaning that **the normality assumption is met**.  
+  
+Earlier in the analysis, we agreed that there is no multicollinearity problem, meaning the independent variables are not correlated with other.  
+
+### 4. Multiple Linear Regression model 
+The assumptions are warranted for us to run a multiple regression model. 
+Since Region is nominal, we will create dummy variable for it. 
+
+```{r}
+summary(model)
+```
+\begin{center} Table 3: Regression statistics \end{center}  
+
+The slope of the regression is -0.14, meaning that for every one unit change in UtilityCosts, MaintenanceCosts changes averagely -0.14 units. 
+Both the intercept and the slope are statistically significant with alpha = 0.05, due to p-value is close to 0.
+R squared is 0.08, meaning that the variation in UtilityCosts only explains 8% of variations in MaintenanceCosts.
+
+
+
+
+
+
+
+
+

@@ -2,8 +2,12 @@
 title: "QANT 530 Homework #1"
 author: "Phan Nguyen"
 date: "07/12/2022"
-output: pdf_document
+output: 
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 11pt 
 ---
+
 For this homework, we are going to do a simple regression analysis on UtilityCosts and MaintenanceCosts from the practice dataset.
 UtilityCosts will be explanatory variable, and MaintenanceCosts will be the response variable.
 
@@ -109,14 +113,23 @@ The residual plot on the left hand side, shows how the predicted versus observed
 Ideally, the red line will stay horizontally at 0. In this case, the red line is not fully horizontal, however it is still close to the zero line. 
 The points are scattered and don't follow any pattern. We can conclude that the linearity and equal variances assumptions are met. 
   
-Homonegeity can be checked using the Scale-Location plot, on the bottom left hand. The red line supposed to be horizontally at zero for homogeneity assumption to be met. 
-It is not the case here. 
-
+Independce of variance can be checked using the Scale-Location plot, on the bottom left hand. The red line supposed to be horizontally at zero for the assumption to be met. 
+We can say that the assumption is met.  
+  
 The normal Q-Q plots on the top right shows visually a straight line, meaning that the normality assumption is met. 
+
+### 5. Simple Linear Regression model 
+The assumptions are warranted for us to run a simple regression model. 
 
 ```{r}
 summary(model)
 ```
+\begin{center} Table 3: Regression statistics \end{center}  
+
+The slope of the regression is -0.14, meaning that for every one unit change in UtilityCosts, MaintenanceCosts changes averagely -0.14 units. 
+Both the intercept and the slope are statistically significant with alpha = 0.05, due to p-value is close to 0.
+R squared is 0.08, meaning that the variation in UtilityCosts only explains 8% of variations in MaintenanceCosts.
+
 
 
 
