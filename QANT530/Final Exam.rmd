@@ -1,0 +1,146 @@
+---
+title: "Final Exam"
+author: "Phan Nguyen"
+date: "09/10/2022"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 11pt 
+---
+
+We are going to do a multiple regression analysis on a dataset with 120 rows and six columns. 
+This dataset represents student exam scores, with each row representing a student. 
+For this exercise, the response variable is ScienceScores. Below is a sample of the dataset. 
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height=6, fig.align="center")
+par(mar=c(0,0,0,0))
+
+```
+
+Table 1: Dataset example
+
+```{r  message=FALSE}
+library(moments)
+library(tidyverse)
+library(xlsx)
+library(psych)
+data <- read.xlsx("/Users/nguyen_phan/Downloads/Dataset.xlsx", 1)
+data <- na.omit(data)
+glimpse(data)
+response <- data$ScienceScores
+```
+
+### 1.Exploratory Analysis on the numerical variables  
+  
+MathScores, EnglishScores and ScienceScores are variables at interval level. The other variables are either nominal or ordinal.  
+Therefore we are going to look at only these three variables.  
+
+**Descriptive numerical summary table**  
+Table 2: Descriptive Statistics table for MathScores, EnglishScores, and ScienceScores
+
+```{r }
+describe(data[,4:6], ranges=TRUE, quant=c(.25,.75))
+```
+  
+From a glance, all three variables' numerical summary makes logical sense. They have approximately close mean and median, and even minimum and maximum values. 
+EnglishScores has a narrower range than the other two (29.44 compared to 36.45 and 42.19).  
+  
+EnglishScores skewed right (skewness >0) while the other two variables skewed left. 
+This is also indicated by the fact that its median smaller than its mean, which is not the case for MathScores and Sciencescores.
+All three variables have heavier tails and lower bell curve, due to their excess kurtosis (i.e kurtosis - 3) lower than 0.  
+    
+**Descriptive chart summaries**  
+```{r }
+par(mar=c(4,4,0,0))
+multi.hist(data[,4:6], main = names(data[,4:6]),breaks=10,freq=TRUE)
+```
+\begin {center} Figure 1: Histogram of MathScores, EnglishScores and ScienceScores  \end{center}
+
+The histogram shows the frequency of data values for the three nterval variable. We can cross check it with the numerical summary we've done on the top. 
+EnglishScores skewed left, while MathScores and Science Scores skewed right. ScienceScores look like it is bimodal. 
+
+```{r }
+par(mar=c(4,4,1,1))
+boxplot(data[,4:6], names = names(data[,4:6]), xlab="")
+```
+\begin{center} Figure 2: Boxplots of MathScores, EnglishScores, and ScienceScores  \end{center}  
+  
+EnglishScores have smaller range and interquartile range, lower median and mean than the other two variables. 
+ScienceScores have the biggest range and interquartile range. All three variables look relatively normal. 
+
+
+### 2. Scatterplot analysis
+```{r }
+par(mar=c(4,4,0,0))
+pairs(ScienceScores~MathScores + EnglishScores, lower.panel=NULL,data=data)
+ 
+```
+\begin{center}Figure 3: Scatterplots for ScienceScores, MathScores and EnglishScores \end{center}  
+
+There seems to be no correlation between these three variables. The data points are scattered. 
+However, visually, EnglishScores and ScienceScores might have a linear relationship upward. 
+  
+Table 3: Correlation Matrix for MathScores, EnglishScores, and ScienceScores
+```{r}
+cor(data[,4:6],method="pearson",use = "complete.obs")
+```
+These variables don't have strong correlation to one another. Therefore it is safe to say there is no collinearity problem. 
+
+### 3. Assumption check 
+First, we fit the data into a model to check all assumptions. Response variable is ScienceScores.
+
+```{r}
+model <- lm(ScienceScores~MathScores + EnglishScores, data=data)
+res <- resid(model)
+par(mfrow = c(2, 2))
+plot(model)
+```
+\begin{center}Figure 4: Simple Regression Plots for model \end{center}  
+
+We can check the assumptions for the multiple regression model using these plots.  
+  
+The residual plot on the left hand side, shows how the predicted versus observed values.
+Ideally, the red line will stay horizontally at 0. In this case, the red line is approximately horizontal and at line 0. 
+The points are scattered and don't follow any pattern. We can conclude that the **linearity and equal variances assumptions are met**. 
+  
+Independence of variance can be checked using the Scale-Location plot, on the bottom left hand. The red line supposed to be horizontally at zero for the assumption to be met. 
+We can say that **the indpendence of variance assumption is met**.  
+  
+The normal Q-Q plots on the top right shows visually a straight line, meaning that **the normality assumption is met**.  
+  
+Earlier in the analysis, we agreed that there is no multicollinearity problem, meaning the independent variables are not correlated with other.  
+All the assumptions are met.
+
+### 4. Recoding categorical tables
+
+There are three categorical variables. They are Tutor Service, Gender and Instructional Program.
+Below is the list of values for each of these variables
+```{r}
+lapply(data[,0:3],unique)
+```
+These variables are binary, they have only 2 unique values. 
+We don't need to recode TutorService and Gender, since they have 0 and 1 already. 
+We need to recode Instructional Program, so that 0 indicates lack of the other program.
+Here is the recoding:  
+
+Table 4: Recoding for InstructionalProgram 
+  
+InstructionalProgram IPdummy 
+-------------------- -------  
+1                    0  
+2                    1   
+
+```{r}
+data$IPdummy <- ifelse(data$InstructionalProgram == 1, 0,1)
+```
+
+
+
+
+
+
+
+
+
+
