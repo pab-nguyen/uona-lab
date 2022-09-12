@@ -1,0 +1,92 @@
+---
+title: "Final Project Report"
+author: "Phan Nguyen"
+date: "09/10/2022"
+output: 
+  pdf_document:
+    latex_engine: xelatex
+fontsize: 11pt 
+---
+
+We are going to do a multiple regression analysis on a dataset with 120 rows and six columns. 
+This dataset represents student exam scores, with each row representing a student. 
+For this exercise, the response variable is ScienceScores. Below is a sample of the dataset. 
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=6, fig.height=6, fig.align="center")
+par(mar=c(0,0,0,0))
+
+```
+
+Table 1: Dataset example
+
+```{r  message=FALSE}
+library(moments)
+library(tidyverse)
+library(xlsx)
+library(psych)
+library(olsrr)
+
+data <- read.xlsx("/Users/nguyen_phan/Downloads/Dataset.xlsx", 1)
+data <- na.omit(data)
+glimpse(data)
+response <- data$ScienceScores
+data$IPdummy <- ifelse(data$InstructionalProgram == 1, 0,1)
+```
+
+### 1.Summary  
+In the earlier version of our report, we have looked at all the variables, 
+explored descriptive statistics and visualizations, correlations matrix.
+MathScores and EnglishScores are our two numerical explanatory variables.
+We also have recoded InstructionalProgram into IPdummy, so that it can be used in our regression.
+Therefore, TutorService, Gender & IPdummy will be our categorical variables 
+
+### 2. Assumption check
+```{r}
+model <- lm(ScienceScores~.-InstructionalProgram, data=data)
+res <- resid(model)
+par(mfrow = c(2, 2))
+plot(model)
+```
+\begin{center}Figure 1: Simple Regression Plots for model \end{center}  
+
+We can check the assumptions for the multiple regression model using these plots.  
+  
+The residual plot on the left hand side, shows how the predicted versus observed values.
+Ideally, the red line will stay horizontally at 0. In this case, the red line is approximately horizontal and at line 0. 
+The points are scattered and don't follow any pattern. We can conclude that the **linearity and equal variances assumptions are met**. 
+  
+Independence of variance can be checked using the Scale-Location plot, on the bottom left hand. The red line supposed to be horizontally at zero for the assumption to be met. 
+We can say that **the indpendence of variance assumption is met**.  
+  
+The normal Q-Q plots on the top right shows visually a straight line, meaning that **the normality assumption is met**.  
+  
+Earlier in the analysis, we agreed that there is no multicollinearity problem, meaning the independent variables are not correlated with other.  
+  
+All the assumptions are met.
+
+
+### 3. Multiple Regression and Variable Selection
+We are going to use backward stepwise variable selection method. 
+
+Table 2: Details for backward Stepwise and Regression Model Output
+```{r}
+fwsel <- ols_step_backward_p(model,penter=.05,details=TRUE)
+fwsel
+```
+The backward stepwise method have not removed any variables
+  
+The model has F-test of 4.717, with p-value of approximately 0. **The model is statistically significant**.
+The Adjusted R-squared is around 0.135, meaning 13.5% of the variation in ScienceScores can be explained by variation in the independent variables.
+
+All variables are significant with p-values less than 0.05, except for TutorSerivce and Gender.
+
+Looking at coefficients, we see that people who has TutorService on average score less on Science than people who don't by 1.563.
+People with Gender 1 scores averagely 2.575 higher in Science than people with Gender 0 (we don't know which is which).
+An 1 unit increase in Mathscores and EnglishScores averagely increase ScienceScores by 0.293 and 0.528, respectively.
+And people who has InstructionalProgram 2 has averagely 4.785 higher score than people wit InstructionalProgram 1.   
+  
+The final regression equation is  
+ScienceScores = 14.180 - 1.563 TutorService + 2.575 Gender + 0.293 MathScores + 0.528 EnglishScores + 4.785 InstructionalProgram
+
+

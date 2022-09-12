@@ -91,7 +91,7 @@ These variables don't have strong correlation to one another. Therefore it is sa
 First, we fit the data into a model to check all assumptions. Response variable is ScienceScores.
 
 ```{r}
-model <- lm(ScienceScores~MathScores + EnglishScores, data=data)
+model <- lm(ScienceScores~., data=data)
 res <- resid(model)
 par(mfrow = c(2, 2))
 plot(model)
@@ -110,6 +110,7 @@ We can say that **the indpendence of variance assumption is met**.
 The normal Q-Q plots on the top right shows visually a straight line, meaning that **the normality assumption is met**.  
   
 Earlier in the analysis, we agreed that there is no multicollinearity problem, meaning the independent variables are not correlated with other.  
+  
 All the assumptions are met.
 
 ### 4. Recoding categorical tables
